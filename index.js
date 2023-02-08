@@ -53,6 +53,88 @@ app.post("/join", async(req,res)=>{
     //values(${})
 })
 
+//로그인요청 
+app.post("/login",async (req,res)=> {
+    // 1)useremail에 일치하는 데이터가 있는지 확인
+    // 2)userpass 암호화를 해서 쿼리 결과의 패스워드랑 일치하는 체크
+   const {aw_id,aw_password} = req.body;
+   
+   conn.query(`select * from member where aw_id = '${aw_id}'`,
+   (err,result,fields)=>{
+    //결과가 undefind가 아니고 결과의 0번째가 undefind가 아닐때
+    //결과가 있을때
+    console.log(result);
+        if(result != undefined && result[0] != undefined){
+            //compare => userpass,result[0].m_pass 비교해서 뒤에 함수호출 
+            bcrypt.compare(aw_password, result[0].aw_password, function(err,rese){
+                //result==true
+                if(rese){
+                    console.log("로그인 성공 우헤헤");
+                    res.send(result);
+                }else{
+                    console.log(err);
+                    res.send("실패");
+                }
+            })
+        }else{
+            console.log("데이터가 없습니다.");
+        }
+   })
+})
+
+//아이디 찾기 요청       (요청, 응답)
+app.post("/findid", async(req,res)=>{
+    const{aw_name,aw_phone,aw_email1} = req.body;
+    //퀴리문 ,실행했을때 결과를 불러오는 콜백함수
+    conn.query(`select * from member where aw_name = '${aw_name}' and aw_phone='${aw_phone}' and aw_email1='${aw_email1}'`,(err,result,fields)=>{
+        if(result) {
+            console.log(result[0].aw_id);
+            res.send(result[0].aw_id);
+        }
+     });
+})
+
+//비밀번호찾기 요청       (요청, 응답)
+app.post("/findpass", async(req,res)=>{
+    const{aw_id,aw_phone} = req.body;
+    //퀴리문 ,실행했을때 결과를 불러오는 콜백함수
+    conn.query(`select * from member where aw_id = '${aw_id}' and aw_phone='${aw_phone}'`,(err,result,fields)=>{
+        if(result) {
+            res.send(result[0].aw_id);
+            console.log(result[0].aw_id);
+        }
+        console.log(err);
+     });
+})
+
+
+//패스워드 변경 요청
+app.patch("/updatePw", async (req,res)=>{
+    const {aw_password, aw_id} = req.body;
+    //update 테이블 이름
+    //set 필드이름=데이블값
+    //where 조건절 update member set m_pass 
+    const mytextpass = aw_password;
+    let myPass = "";
+    if(mytextpass != '' && mytextpass != undefined){
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            //hash 함수를 호출되면 인자로 넣어준 비밀번호를 암호화하여
+            //콜백함수 안 hash로 돌려준다.
+            bcrypt.hash(mytextpass, salt, function(err, hash) {
+                myPass = hash;
+                //쿼리작성
+                conn.query(`update member set aw_password ='${myPass}', aw_passwordch='${myPass}' where aw_id='${aw_id}'
+                `,(err, result, fields)=>{
+                if(result){
+                    res.send("등록되었습니다.");
+                    console.log(result);
+                    }
+                console.log(err);
+                })
+            });
+        });
+    }
+ })
 
 //서버를 구동 
 app.listen(port,()=>{
