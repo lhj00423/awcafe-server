@@ -1,6 +1,7 @@
 const express= require("express");
 const cors = require("cors");
 const mysql = require("mysql");
+const multer = require("multer");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 //서버 생성
@@ -12,6 +13,26 @@ app.use(cors());
 //josn 형식의 데이터를 처리하도록 설정
 app.use(express.json());
 
+//upload 폴더 클라이언트에 접근 가능하도록 설정
+app.use("/upload",express.static("upload"));
+//storage 생성 / diskStorage 파일을 저장할때의 모든 기능제어기능을 제공
+const storage = multer.diskStorage({
+    destination: (req, file, cd)=>{
+        cd(null, 'upload/');
+    },
+    filename: (req, file, cd)=>{
+        const newFilename = file.originalname;
+        cd(null, newFilename)
+    },
+})
+//upload 객체 생성하기
+const upload = multer({storage:storage});
+//upload 경로로 post 요청시 응답 구하기
+app.post("/upload", upload.single('img'),(req,res)=>{
+    res.send({
+        imageUrl : req.file.filename
+    })
+})
 //mysql 연결하기 
 const conn = mysql.createConnection({
     host: "localhost",
@@ -97,7 +118,7 @@ app.post("/findid", async(req,res)=>{
 //비밀번호찾기 요청       (요청, 응답)
 app.post("/findpass", async(req,res)=>{
     const{aw_id,aw_phone} = req.body;
-    //퀴리문 ,실행했을때 결과를 불러오는 콜백함수
+    //퀴리문 ,실행했을때 결과를 불러오는 콜백함수 
     conn.query(`select * from member where aw_id = '${aw_id}' and aw_phone='${aw_phone}'`,(err,result,fields)=>{
         if(result) {
             res.send(result[0].aw_id);
@@ -136,6 +157,60 @@ app.patch("/updatePw", async (req,res)=>{
     }
  })
 
+//커피등록요청 
+app.post('/AW',async (req,res)=>{
+    const {cp_name,cp_category,cp_img,cp_price} = req.body;
+    conn.query(`insert into cp (cp_name,cp_category,cp_img,cp_price) values(?,?,?,?)`,
+        [cp_name,cp_category,cp_img,cp_price],
+        (err,result,fileds)=>{
+            if(result){
+                res.send("ok")
+            }else{
+                console.log(err);
+            }
+    })
+})
+//커피 데이터 불러오기
+app.get("/AW/coldbrew",async (req,res) => {
+    conn.query(`select * from cp where cp_category='콜드 브루' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/brewdcoffee",async (req,res) => {
+    conn.query(`select * from cp where cp_category='브루드 커피' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/esopress",async (req,res) => {
+    conn.query(`select * from cp where cp_category='에스프레소' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/frapp",async (req,res) => {
+    conn.query(`select * from cp where cp_category='프라푸치노' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/blend",async (req,res) => {
+    conn.query(`select * from cp where cp_category='블렌디드' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/refres",async (req,res) => {
+    conn.query(`select * from cp where cp_category='AW 리프레셔' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/fizzio",async (req,res) => {
+    conn.query(`select * from cp where cp_category='AW 피지오' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/tea",async (req,res) => {
+    conn.query(`select * from cp where cp_category='티(티바나)' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
 //서버를 구동 
 app.listen(port,()=>{
     console.log("서버가 동작하고 있습니다.");
