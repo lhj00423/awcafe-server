@@ -211,6 +211,104 @@ app.get("/AW/tea",async (req,res) => {
         res.send(result)
     })
 })
+
+//음식등록요청 
+app.post('/food',async (req,res)=>{
+    const {f_name,f_category,f_img,f_price} = req.body;
+    conn.query(`insert into food (f_name,f_category,f_img,f_price) values(?,?,?,?)`,
+        [f_name,f_category,f_img,f_price],
+        (err,result,fileds)=>{
+            if(result){
+                res.send("ok")
+            }else{
+                console.log(err);
+            }
+    })
+})
+
+//음식 데이터 불러오기
+app.get("/AW/bread",async (req,res) => {
+    conn.query(`select * from food where f_category='브레드' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/cake",async (req,res) => {
+    conn.query(`select * from food where f_category='케이크' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/sandwich",async (req,res) => {
+    conn.query(`select * from food where f_category='샌드위치 & 샐러드' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/food",async (req,res) => {
+    conn.query(`select * from food where f_category='따뜻한 푸드' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/fruit",async (req,res) => {
+    conn.query(`select * from food where f_category='과일 & 요거트' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/snack",async (req,res) => {
+    conn.query(`select * from food where f_category='스낵 & 미니 디저트' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/icecream",async (req,res) => {
+    conn.query(`select * from food where f_category='아이스크림' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+
+//상품 등록요청 
+app.post('/product',async (req,res)=>{
+    const {p_name,p_category,p_img,p_price} = req.body;
+    conn.query(`insert into product (p_name,p_category,p_img,p_price) values(?,?,?,?)`,
+        [p_name,p_category,p_img,p_price],
+        (err,result,fileds)=>{
+            if(result){
+                res.send("ok")
+            }else{
+                console.log(err);
+            }
+    })
+})
+
+//상품 데이터 불러오기
+app.get("/AW/mug",async (req,res) => {
+    conn.query(`select * from product where p_category='머그' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/glass",async (req,res) => {
+    conn.query(`select * from product where p_category='글라스' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/ptumbler",async (req,res) => {
+    conn.query(`select * from product where p_category='플라스틱 텀블러' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/stumbler",async (req,res) => {
+    conn.query(`select * from product where p_category='스테인리스 텀블러' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/accessory",async (req,res) => {
+    conn.query(`select * from product where p_category='악세서리' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+app.get("/AW/coffegoods",async (req,res) => {
+    conn.query(`select * from product where p_category='커피 용품' `,(err,result,fields)=>{
+        res.send(result)
+    })
+})
+
 //서버를 구동 
 app.listen(port,()=>{
     console.log("서버가 동작하고 있습니다.");
